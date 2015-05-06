@@ -24,7 +24,10 @@ shinyUI(pageWithSidebar(
                        end = max(df$Date_id), min = min(df$Date_id), 
                        max = max(df$Date_id), format = "yyyy-mm-dd", 
                        startview = "month", weekstart = 0, language = "en", 
-                       separator = " to ")
+                       separator = " to "),
+        
+        sliderInput("k", 'Elo "k" Parameter', 
+                    min=1, max=100, value=25)
         
     ),
     

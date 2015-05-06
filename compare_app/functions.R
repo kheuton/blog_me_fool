@@ -27,8 +27,11 @@ ppg <- function(df){
     standings
 }
 
-standings <- function(df, metric){
+standings <- function(df, metric, k=NULL){
     metrics <- list(avg_rank=avg_rank, ppg=ppg, linear_scores=linear_scores, elo=elo, elo2=elo2)
+    if (metric %in% c("elo", "elo2")){
+        return(metrics[[metric]](df, k=k))
+    }
     metrics[[metric]](df)
 }
 
@@ -129,8 +132,8 @@ elo <- function(df, k=25, update_function=update_elo, for_graph=FALSE){
     standings
 }
 
-elo2 <- function(df){
-    elo(df, k=25, update_function=update_elo2)
+elo2 <- function(df, k){
+    elo(df, k, update_function=update_elo2)
 }
 
 reshape_game <- function(single_game, all_players){

@@ -22,7 +22,7 @@ shinyServer(function(input, output) {
     output$standings <- renderTable({
         df <- subset(deck_subset(df, input$deck), Date_id >= input$date[1] & 
                          Date_id <= input$date[2])
-        standings(df, input$metric)
+        standings(df, input$metric, input$k)
     })
     
     output$gp <- renderTable({
@@ -38,8 +38,8 @@ shinyServer(function(input, output) {
         df <- subset(deck_subset(df, input$deck), Date_id >= input$date[1] & 
                          Date_id <= input$date[2])
         update_function <- c(update_elo, update_elo2)[[(input$metric!="elo")+1]]
-        df <-  elo(df, update_function=update_function, for_graph=TRUE)
+        df <- elo(df, update_function=update_function, for_graph=TRUE, k=input$k)
         p <- ggplot(data=df, aes(x=date, y=score, group=Player, color=Player))
-        p + geom_line() + labs(main="Elo Over Time", xlab="Date", ylab="Score")
+        p + geom_line() + labs(title="Elo Over Time", x="Date", y="Score")
     })
 })
