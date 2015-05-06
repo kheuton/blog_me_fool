@@ -1,4 +1,4 @@
-library(shiny); library(gsheet)
+library(shiny); library(gsheet); library(ggplot2)
 rm(list=ls())
 
 link <- paste0("https://docs.google.com/spreadsheets/d/1XsWOxX099kS0ynf40s",
