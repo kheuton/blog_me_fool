@@ -1,4 +1,4 @@
-library(shiny); library(gsheet); library(plyr)
+library(shiny); library(gsheet); library(plyr); library(ggplot2)
 setwd("~/Dropbox/sopt_it/compare_app/")
 
 rm(list=ls())
@@ -11,28 +11,43 @@ df$Date_id <- as.Date(df$Date_id, format="%m/%d/%Y")
 
 k=100
 source("./functions.R")
-Player <- unique(df$Player)
-base <- create_elo_base(df)
-df <- df[order(df$Date_id),]
-for(i in unique(df$Game_ID)){
-    new_game <- subset(df, Game_ID == i)
-    base <- update_elo(new_game, base, k)
-}
-#standings <- base[!duplicated(base$Player, fromLast = TRUE),]
-#standings <- standings[order(-standings$score),]
-#rownames(standings) <- NULL
-#standings$date <- NULL
-#standings
-#base
-players <- c("Pat", "Neal", "Baby K", "Claire", "Mari")
 
-plot (base$date, base$score, type = 'n')
-for (i in 1:length (players)){
-    temp <-  subset (base, Player == players [i])
-    temp <- ddply(temp, ~date,summarise,score=mean(score))
-    lines (temp$date, temp$score, col = i, 
-           lty = 6, lwd = 1)
+elo_graph <- function(df, k=25){
+    Player <- unique(df$Player)
+    base <- create_elo_base(df)
+    df <- df[order(df$Date_id),]
+    for(i in unique(df$Game_ID)){
+        new_game <- subset(df, Game_ID == i)
+        base <- update_elo(new_game, base, k)
+    }
+    standings <- base[!duplicated(base$Player, fromLast = TRUE),]
+    standings <- standings[order(-standings$score),]
+    best <- standings$Player[1:min(c(5, nrow(standings)))]
+    rownames(base) <- NULL
+    #standings$date <- NULL
+    base <- subset(base, Player %in% best)
+    base <- base[duplicated(base$Player),]
+    base[!duplicated(base[,c("Player", "date")], fromLast=TRUE),]
 }
 
-legend ("topleft", players, col = 1:5, lty = 6, lwd = 1, 
-        cex=.7, pt.cex=3, text.font=2)
+elo2_graph <- function(df, k=25){
+    Player <- unique(df$Player)
+    base <- create_elo_base(df)
+    df <- df[order(df$Date_id),]
+    for(i in unique(df$Game_ID)){
+        new_game <- subset(df, Game_ID == i)
+        base <- update_elo2(new_game, base, k)
+    }
+    standings <- base[!duplicated(base$Player, fromLast = TRUE),]
+    standings <- standings[order(-standings$score),]
+    best <- standings$Player[1:min(c(5, nrow(standings)))]
+    rownames(base) <- NULL
+    #standings$date <- NULL
+    base <- subset(base, Player %in% best)
+    base <- base[duplicated(base$Player),]
+    base[!duplicated(base[,c("Player", "date")], fromLast=TRUE),]
+}
+
+temp <- elo2_graph(df)
+
+ggplot(data=temp, aes(x=date, y=score, group=Player, color=Player)) + geom_line()

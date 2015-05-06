@@ -108,34 +108,29 @@ update_elo2 <- function(new_game, base, k){
     rbind(base, new_df)
 }
 
-elo <- function(df, k=100){
+elo <- function(df, k=25, update_function=update_elo, for_graph=FALSE){
     Player <- unique(df$Player)
     base <- create_elo_base(df)
     df <- df[order(df$Date_id),]
     for(i in unique(df$Game_ID)){
         new_game <- subset(df, Game_ID == i)
-        base <- update_elo(new_game, base, k)
+        base <- update_function(new_game, base, k)
     }
     standings <- base[!duplicated(base$Player, fromLast = TRUE),]
     standings <- standings[order(-standings$score),]
     rownames(standings) <- NULL
+    if (for_graph){
+        best <- standings$Player[1:min(c(5, nrow(standings)))]
+        base <- subset(base, Player %in% best)
+        base <- base[duplicated(base$Player),]
+        return(base[!duplicated(base[,c("Player", "date")], fromLast=TRUE),])
+    }
     standings$date <- NULL
     standings
 }
 
-elo2 <- function(df, k=100){
-    Player <- unique(df$Player)
-    base <- create_elo_base(df)
-    df <- df[order(df$Date_id),]
-    for(i in unique(df$Game_ID)){
-        new_game <- subset(df, Game_ID == i)
-        base <- update_elo2(new_game, base, k)
-    }
-    standings <- base[!duplicated(base$Player, fromLast = TRUE),]
-    standings <- standings[order(-standings$score),]
-    rownames(standings) <- NULL
-    standings$date <- NULL
-    standings
+elo2 <- function(df){
+    elo(df, k=25, update_function=update_elo2)
 }
 
 reshape_game <- function(single_game, all_players){
