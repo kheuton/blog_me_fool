@@ -32,6 +32,7 @@ shinyUI(pageWithSidebar(
     mainPanel(
         tabsetPanel(
             tabPanel("Standings", tableOutput("standings")), 
-            tabPanel("Games Played", tableOutput("gp"))
+            tabPanel("Games Played", tableOutput("gp")),
+            tabPanel("Elo Graph", plotOutput("graphs"))
         )
     )))

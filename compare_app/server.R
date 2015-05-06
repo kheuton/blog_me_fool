@@ -26,7 +26,20 @@ shinyServer(function(input, output) {
     })
     
     output$gp <- renderTable({
-        games_played_df(subset(deck_subset(df, input$deck), Date_id >= input$date[1] & 
+        games_played_df(subset(deck_subset(df, input$deck), 
+                               Date_id >= input$date[1] & 
                                    Date_id <= input$date[2]))
+    })
+    
+    output$graphs <- renderPlot({
+        if (input$metric %in% c("avg_rank", "ppg", "linear_scores")){
+            return(NULL)
+        }
+        df <- subset(deck_subset(df, input$deck), Date_id >= input$date[1] & 
+                         Date_id <= input$date[2])
+        update_function <- c(update_elo, update_elo2)[[(input$metric!="elo")+1]]
+        df <-  elo(df, update_function=update_function, for_graph=TRUE)
+        p <- ggplot(data=df, aes(x=date, y=score, group=Player, color=Player))
+        p + geom_line() + labs(main="Elo Over Time", xlab="Date", ylab="Score")
     })
 })
